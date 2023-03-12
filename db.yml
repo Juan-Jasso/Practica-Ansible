@@ -1,0 +1,10 @@
+- hosts: all
+  become: true
+  
+  tasks:
+    - name: create a new database
+      mysql_db: name=sistema_ecommerce state=present login_user=root login_password="1234"
+    - name: add sample data to database
+      copy: src=script.sql dest=/tmp/script.sql
+    - name: insert sample data into database
+      mysql_db: name=sistema_ecommerce state=import target=/tmp/script.sql login_user=root login_password="1234"

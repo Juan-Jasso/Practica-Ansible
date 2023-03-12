@@ -1,0 +1,70 @@
+- hosts: all
+  become: true
+  vars_files:
+  - vars/app_web.yml
+  
+  tasks:    
+  - name: Create document root
+    file:
+      path: "/var/www/{{ http_host }}"
+      state: directory
+      owner: "{{ app_user}}"
+      mode: '0755'
+       
+  - name: Set up Apache virtualhost
+    template:
+      src: "files/app.jjasso.com.conf"
+      dest: "/etc/apache2/sites-available/{{ http_conf }}"
+    notify: Reload Apache
+     
+  - name: Enable new site
+    shell: /usr/sbin/a2ensite {{ http_conf }}
+    notify: Reload Apache
+    
+#MySQL Configuration
+  - name: sets the root password
+    mysql_user:
+      login_user: root
+      login_password: "1234"
+      name: root
+      password: "{{ mysql_root_password }}"
+      login_unix_socket: /var/run/mysqld/mysqld.sock
+
+  - name: Removes all anonymous user accounts
+    mysql_user:
+      name: ''
+      host_all: yes
+      state: absent
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+
+  - name: Removes the MySQL test databases
+    mysql_db:
+      name: test
+      state: absent
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+
+#UFW configuration
+  - name: "UFW - Allow HTTP on port {{ http_port }}"
+    ufw:
+      rule: allow
+      port: "{{ http_port }}"
+      proto: tcp
+
+#PHP Info page
+  - name: Ansible copy directory to the remote server
+    copy: 
+      src: "tienda_web/"
+      dest: "/var/www/{{ http_host }}/"
+        
+  handlers:
+   - name: Reload Apache
+     service:
+       name: apache2
+       state: reloaded
+
+   - name: Restart apache
+     service: 
+       name: apache2
+       state: restarted

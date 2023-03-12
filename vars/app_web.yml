@@ -1,0 +1,6 @@
+mysql_root_password: "1234"
+app_user: "jasso"
+http_host: "app.jjasso.com"
+http_conf: "app.jjasso.com.conf"
+http_port: "80"
+disable_default: true

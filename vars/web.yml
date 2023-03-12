@@ -1,0 +1,5 @@
+app_user: "jasso"
+http_host: "jjasso.com"
+http_conf: "jjasso.com.conf"
+http_port: "80"
+disable_default: true
